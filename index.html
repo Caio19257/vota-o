@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urna Eletrônica</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #dfe3e8;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .urna {
+            width: 100%;
+            max-width: 340px;
+            background: #2d3748;
+            border-radius: 18px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
+        }
+        .tela {
+            background: #f4f7f2;
+            border: 3px solid #1a202c;
+            border-radius: 8px;
+            padding: 16px;
+            min-height: 190px;
+        }
+        h2 { font-size: 20px; color: #0d47a1; margin-bottom: 10px; }
+        #numero { font-size: 32px; font-weight: bold; letter-spacing: 6px; }
+        #nome { margin: 6px 0 10px; font-weight: bold; min-height: 20px; }
+        #lista { font-size: 12px; color: #4a5568; line-height: 1.5; }
+        .teclado {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 16px;
+        }
+        button {
+            padding: 14px 0;
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+            background: #1a202c;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        button:focus-visible { outline: 3px solid #90caf9; }
+        .corrige { background: #ef6c00; font-size: 13px; }
+        .confirma { background: #2e7d32; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <div class="urna">
+        <div class="tela">
+            <h2 id="cargo"></h2>
+            <div id="numero"></div>
+            <div id="nome"></div>
+            <div id="lista"></div>
+        </div>
+        <div class="teclado" id="teclado"></div>
+    </div>
+
+    <script>
+        const cargos = [
+            { titulo: "Presidente", candidatos: { "10": "Ana Ribeiro", "20": "Carlos Menezes", "30": "Marina Albuquerque" } },
+            { titulo: "Governador", candidatos: { "11": "Roberto Tavares", "22": "Helena Cavalcanti", "33": "Paulo Siqueira" } }
+        ];
+        let etapa = 0, numero = "";
+        const $ = id => document.getElementById(id);
+
+        function mostrar() {
+            const c = cargos[etapa];
+            $("cargo").textContent = "Voto para " + c.titulo;
+            $("numero").textContent = numero.padEnd(2, "_");
+            $("nome").textContent = numero.length === 2 ? (c.candidatos[numero] || "Número inválido (voto nulo)") : "";
+            $("lista").innerHTML = Object.entries(c.candidatos).map(([n, nome]) => n + " - " + nome).join("<br>");
+        }
+
+        function confirmar() {
+            const c = cargos[etapa];
+            if (numero.length < 2) return alert("Digite os 2 números do candidato.");
+            if (!c.candidatos[numero]) return alert("Número inválido. Clique em CORRIGE e tente de novo.");
+
+            alert("Você votou em: " + c.candidatos[numero]);
+            numero = "";
+            etapa++;
+
+            if (etapa === cargos.length) {
+                document.querySelector(".urna").innerHTML = "<h2 style='color:#fff;text-align:center'>FIM</h2>";
+            } else {
+                mostrar();
+            }
+        }
+
+        ["1", "2", "3", "4", "5", "6", "7", "8", "9", "CORRIGE", "0", "CONFIRMA"].forEach(t => {
+            const b = document.createElement("button");
+            b.type = "button";
+            b.textContent = t;
+            if (t === "CORRIGE") b.className = "corrige";
+            if (t === "CONFIRMA") b.className = "confirma";
+            b.onclick = () => {
+                if (t === "CORRIGE") numero = "";
+                else if (t === "CONFIRMA") return confirmar();
+                else if (numero.length < 2) numero += t;
+                mostrar();
+            };
+            $("teclado").appendChild(b);
+        });
+
+        mostrar();
+    </script>
+</body>
+</html>
